@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'submit_button.dart';
 import 'form_field_widget.dart';
+import 'form_password_field_widget.dart';
 
 class LoginFormWidget extends StatefulWidget {
   const LoginFormWidget({super.key});
@@ -15,6 +16,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
 
   String _emailError = '';
   String _passwordError = '';
+  bool _isTouched = false;
 
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   final int _passwordMinLength = 8;
@@ -22,7 +24,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   final RegExp _emailUpperCase = RegExp(r'[A-Z]');
   final RegExp _emailNumber = RegExp(r'[0-9]');
 
-  void validateEmail() {
+  void _validateEmail() {
     String error = '';
 
     if (_email.isEmpty) {
@@ -36,10 +38,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
     });
   }
 
-  void validatePassword() {
+  void _validatePassword() {
     String error = '';
-
-    print(_password);
 
     if (_password.isEmpty) {
       error = 'Password is required';
@@ -85,8 +85,14 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   }
 
   void _handleSubmit() {
-    validateEmail();
-    validatePassword();
+    _validateEmail();
+    _validatePassword();
+
+    if (!_isTouched) {
+      setState(() {
+        _isTouched = true;
+      });
+    }
 
     if (_emailError.isEmpty && _passwordError.isEmpty) {
       _showSuccessfulDialog();
@@ -96,20 +102,16 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   void _handleEmailChanged(String value) {
     _email = value;
 
-    if (_emailError.isNotEmpty) {
-      setState(() {
-        _emailError = '';
-      });
+    if (_isTouched) {
+      _validateEmail();
     }
   }
 
   void _handlePasswordChanged(String value) {
     _password = value;
 
-    if (_passwordError.isNotEmpty) {
-      setState(() {
-        _passwordError = '';
-      });
+    if (_isTouched) {
+      _validatePassword();
     }
   }
 
@@ -120,20 +122,26 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
       child: Column(
           children: [
             FormFieldWidget(
-              label: 'Email',
-              error: _emailError,
-              onChanged: _handleEmailChanged,
+                autofocus: true,
+                label: 'Email',
+                error: _emailError,
+                onChanged: _handleEmailChanged,
+                isTouched: _isTouched
             ),
-            FormFieldWidget(
-              label: 'Password',
-              error: _passwordError,
-              onChanged: _handlePasswordChanged,
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: FormPasswordFieldWidget(
+                  label: 'Password',
+                  error: _passwordError,
+                  onChanged: _handlePasswordChanged,
+                  isTouched: _isTouched
+              ),
             ),
             Padding(
                 padding: const EdgeInsets.only(top: 24.0),
                 child: SubmitButtonWidget(
-                    text: 'Login',
-                    onPressed: _handleSubmit,
+                  text: 'Sign up',
+                  onPressed: _handleSubmit,
                 )
             )
           ]
