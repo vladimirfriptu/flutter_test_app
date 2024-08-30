@@ -15,8 +15,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   String _password = '';
 
   String _emailError = '';
-  String _passwordError = '';
-  bool _isTouched = false;
+  List<PasswordError> _passwordErrors = [PasswordError.minLength, PasswordError.uppercase, PasswordError.number];
+  bool _isEmailTouched = false;
+  bool _isPasswordTouched = false;
 
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   final int _passwordMinLength = 8;
@@ -33,28 +34,38 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
       error = 'Invalid email format';
     }
 
-    setState(() {
-      _emailError = error;
-    });
+    if (error != _emailError) {
+      setState(() {
+        _emailError = error;
+      });
+    }
   }
 
   void _validatePassword() {
-    String error = '';
+    List<PasswordError> errors = [];
 
     if (_password.isEmpty) {
-      error = 'Password is required';
-    } else if (_password.length < _passwordMinLength) {
-      error = 'Password must be at least 8 characters';
-    } else if (_password.length > _passwordMaxLength) {
-      error = 'Password must be less than 64 characters';
-    } else if (!_password.contains(_emailUpperCase)) {
-      error = 'Password must contain an uppercase letter';
-    } else if (!_password.contains(_emailNumber)) {
-      error = 'Password must contain a number';
+      errors.add(PasswordError.required);
+    }
+
+    if (_password.length < _passwordMinLength || _password.contains(' ')) {
+      errors.add(PasswordError.minLength);
+    }
+
+    if (_password.length > _passwordMaxLength) {
+      errors.add(PasswordError.maxLength);
+    }
+
+    if (!_password.contains(_emailUpperCase)) {
+      errors.add(PasswordError.uppercase);
+    }
+
+    if (!_password.contains(_emailNumber)) {
+      errors.add(PasswordError.number);
     }
 
     setState(() {
-      _passwordError = error;
+      _passwordErrors = errors;
     });
   }
 
@@ -88,13 +99,14 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
     _validateEmail();
     _validatePassword();
 
-    if (!_isTouched) {
+    if (!_isEmailTouched || !_isPasswordTouched) {
       setState(() {
-        _isTouched = true;
+        _isEmailTouched = true;
+        _isPasswordTouched = true;
       });
     }
 
-    if (_emailError.isEmpty && _passwordError.isEmpty) {
+    if (_emailError.isEmpty && _passwordErrors.isEmpty) {
       _showSuccessfulDialog();
     }
   }
@@ -102,21 +114,40 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   void _handleEmailChanged(String value) {
     _email = value;
 
-    if (_isTouched) {
+    if (_isEmailTouched) {
       _validateEmail();
     }
+  }
+
+  void _handleEmailFieldBlur() {
+    if (!_isEmailTouched) {
+      setState(() {
+        _isEmailTouched = true;
+      });
+    }
+
+    _validateEmail();
+  }
+
+  void _handlePasswordFieldBlur() {
+    if (!_isPasswordTouched) {
+      setState(() {
+        _isPasswordTouched = true;
+      });
+    }
+
+    _validatePassword();
   }
 
   void _handlePasswordChanged(String value) {
     _password = value;
 
-    if (_isTouched) {
-      _validatePassword();
-    }
+    _validatePassword();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -124,17 +155,20 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
             FormFieldWidget(
                 autofocus: true,
                 label: 'Email',
-                error: _emailError,
+                error: _emailError.isNotEmpty,
+                errorMessage: _emailError,
                 onChanged: _handleEmailChanged,
-                isTouched: _isTouched
+                onBlur: _handleEmailFieldBlur,
+                isTouched: _isEmailTouched
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 20.0),
+              padding: const EdgeInsets.only(top: 10.0),
               child: FormPasswordFieldWidget(
                   label: 'Password',
-                  error: _passwordError,
+                  errors: _passwordErrors,
                   onChanged: _handlePasswordChanged,
-                  isTouched: _isTouched
+                  onBlur: _handlePasswordFieldBlur,
+                  isTouched: _isPasswordTouched
               ),
             ),
             Padding(

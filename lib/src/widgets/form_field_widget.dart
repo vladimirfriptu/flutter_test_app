@@ -9,20 +9,24 @@ class AbstractColors {
 
 class FormFieldWidget extends StatefulWidget {
   final String label;
-  final String error;
+  final bool error;
+  final String errorMessage;
   final void Function(String) onChanged;
   final bool isTouched;
   final Widget? suffixIcon;
   final bool obscureText;
   final bool autofocus;
+  final void Function()? onBlur;
 
   const FormFieldWidget({
     Key? key,
     required this.label,
-    required this.error,
+    this.error = false,
     required this.onChanged,
+    this.errorMessage = '',
     this.isTouched = false,
     this.suffixIcon,
+    this.onBlur,
     this.autofocus = false,
     this.obscureText = false
   });
@@ -43,13 +47,13 @@ class _FormFieldWidgetState extends State<FormFieldWidget> {
    );
 
    Color _getTextFieldColor() {
-     final bool isSuccessful = widget.isTouched && widget.error.isEmpty;
+     final bool isSuccessful = widget.isTouched && !widget.error;
 
      if (isSuccessful) {
        return AbstractColors.success;
      }
 
-     if (widget.error.isNotEmpty) {
+     if (widget.error) {
        return AbstractColors.error;
      }
 
@@ -61,7 +65,7 @@ class _FormFieldWidgetState extends State<FormFieldWidget> {
    }
 
    Color _getHintFieldColor() {
-     if (widget.error.isNotEmpty) {
+     if (widget.error) {
         return AbstractColors.error;
       }
 
@@ -72,7 +76,7 @@ class _FormFieldWidgetState extends State<FormFieldWidget> {
       return AbstractColors.inactive;
    }
 
-   _handleTextChanged(String value) {
+   void _handleTextChanged(String value) {
      widget.onChanged(value);
 
      setState(() {
@@ -80,55 +84,77 @@ class _FormFieldWidgetState extends State<FormFieldWidget> {
      });
    }
 
-  @override
-  Widget build(BuildContext context) {
-    bool isSuccessful = widget.isTouched && widget.error.isEmpty;
+   void _handleFocusChange(bool hasFocus) {
+     setState(() {
+       _isFocused = hasFocus;
+     });
 
-    return Focus(
-      onFocusChange: (hasFocus) {
-        setState(() {
-          _isFocused = hasFocus;
-        });
-      },
-      child: TextField(
-        onChanged: _handleTextChanged,
-        style: TextStyle(
-          color: _getTextFieldColor(),
-        ),
-        obscureText: widget.obscureText,
-        autofocus: widget.autofocus,
-        decoration: InputDecoration(
-          hintText: widget.label,
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.5),
-          hintStyle: TextStyle(
-              color: _getHintFieldColor(),
-              fontSize: 16.0
-          ),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              borderSide: BorderSide(
-                  color: isSuccessful ? AbstractColors.success : Colors.transparent,
-              )
-          ),
-          suffixIcon: widget.suffixIcon,
-          focusedBorder: OutlineInputBorder(
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            borderSide: BorderSide(
-                color: isSuccessful ? AbstractColors.success : AbstractColors.inactive,
-            ),
-          ),
-          errorBorder: _errorBorder,
-          focusedErrorBorder: _errorBorder,
-          error: widget.error.isEmpty ? null : Text(
-              widget.error,
+     if (!hasFocus) {
+       widget.onBlur?.call();
+     }
+   }
+
+   Widget? _buildErrorWidget() {
+      if (widget.error) {
+
+        if (widget.errorMessage.isNotEmpty) {
+          return Text(
+              widget.errorMessage,
               style: TextStyle(
                   color: AbstractColors.error,
-                  fontSize: 16.0
+                  fontSize: 13.0
               )
-          ),
-        ),
+          );
+        }
+
+        return Container();
+      }
+
+      return null;
+   }
+
+  @override
+  Widget build(BuildContext context) {
+    bool _isSuccessful = widget.isTouched && !widget.error;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: widget.errorMessage.isEmpty ? 24.0 : 0.0),
+      child: Focus(
+          onFocusChange: _handleFocusChange,
+          child: TextField(
+            onChanged: _handleTextChanged,
+            style: TextStyle(
+              color: _getTextFieldColor(),
+            ),
+            obscureText: widget.obscureText,
+            autofocus: widget.autofocus,
+            decoration: InputDecoration(
+              hintText: widget.label,
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.5),
+              hintStyle: TextStyle(
+                  color: _getHintFieldColor(),
+                  fontSize: 16.0
+              ),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  borderSide: BorderSide(
+                    color: _isSuccessful ? AbstractColors.success : Colors.transparent,
+                  )
+              ),
+              suffixIcon: widget.suffixIcon,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                borderSide: BorderSide(
+                  color: _isSuccessful ? AbstractColors.success : AbstractColors.inactive,
+                ),
+              ),
+              errorBorder: _errorBorder,
+              focusedErrorBorder: _errorBorder,
+              error: _buildErrorWidget(),
+            ),
+          )
       )
     );
   }

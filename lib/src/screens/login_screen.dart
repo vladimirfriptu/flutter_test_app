@@ -6,16 +6,15 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // linear gradient from top #F4F9FF to bottom #E0EDFB
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Color(0xFFF4F9FF),
-              Color(0xFFE0EDFB),
+              Color(0xFFECEFF6),
+              Color(0xFFD8E4F2),
             ],
           ),
         ),
