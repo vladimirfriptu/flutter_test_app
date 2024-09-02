@@ -3,14 +3,14 @@ import 'submit_button.dart';
 import 'form_field_widget.dart';
 import 'form_password_field_widget.dart';
 
-class LoginFormWidget extends StatefulWidget {
-  const LoginFormWidget({super.key});
+class SignupFormWidget extends StatefulWidget {
+  const SignupFormWidget({super.key});
 
   @override
-  State<LoginFormWidget> createState() => _LoginFormWidgetState();
+  State<SignupFormWidget> createState() => _SignupFormWidgetState();
 }
 
-class _LoginFormWidgetState extends State<LoginFormWidget> {
+class _SignupFormWidgetState extends State<SignupFormWidget> {
   String _email = '';
   String _password = '';
 
@@ -153,7 +153,6 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
       child: Column(
           children: [
             FormFieldWidget(
-                autofocus: true,
                 label: 'Email',
                 error: _emailError.isNotEmpty,
                 errorMessage: _emailError,

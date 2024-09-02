@@ -19,7 +19,7 @@ class FormFieldWidget extends StatefulWidget {
   final void Function()? onBlur;
 
   const FormFieldWidget({
-    Key? key,
+    super.key,
     required this.label,
     this.error = false,
     required this.onChanged,
@@ -115,45 +115,47 @@ class _FormFieldWidgetState extends State<FormFieldWidget> {
 
   @override
   Widget build(BuildContext context) {
-    bool _isSuccessful = widget.isTouched && !widget.error;
+    final bool isSuccessful = widget.isTouched && !widget.error;
 
     return Padding(
       padding: EdgeInsets.only(bottom: widget.errorMessage.isEmpty ? 24.0 : 0.0),
       child: Focus(
           onFocusChange: _handleFocusChange,
-          child: TextField(
-            onChanged: _handleTextChanged,
-            style: TextStyle(
-              color: _getTextFieldColor(),
-            ),
-            obscureText: widget.obscureText,
-            autofocus: widget.autofocus,
-            decoration: InputDecoration(
-              hintText: widget.label,
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.5),
-              hintStyle: TextStyle(
-                  color: _getHintFieldColor(),
-                  fontSize: 16.0
+          child: Container(
+            child: TextField(
+              onChanged: _handleTextChanged,
+              style: TextStyle(
+                color: _getTextFieldColor(),
               ),
-              enabledBorder: OutlineInputBorder(
+              obscureText: widget.obscureText,
+              autofocus: widget.autofocus,
+              decoration: InputDecoration(
+                hintText: widget.label,
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.5),
+                hintStyle: TextStyle(
+                    color: _getHintFieldColor(),
+                    fontSize: 16.0
+                ),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(
+                      color: isSuccessful ? AbstractColors.success : Colors.transparent,
+                    )
+                ),
+                suffixIcon: widget.suffixIcon,
+                focusedBorder: OutlineInputBorder(
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                   borderSide: BorderSide(
-                    color: _isSuccessful ? AbstractColors.success : Colors.transparent,
-                  )
-              ),
-              suffixIcon: widget.suffixIcon,
-              focusedBorder: OutlineInputBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                borderSide: BorderSide(
-                  color: _isSuccessful ? AbstractColors.success : AbstractColors.inactive,
+                    color: isSuccessful ? AbstractColors.success : AbstractColors.inactive,
+                  ),
                 ),
+                errorBorder: _errorBorder,
+                focusedErrorBorder: _errorBorder,
+                error: _buildErrorWidget(),
               ),
-              errorBorder: _errorBorder,
-              focusedErrorBorder: _errorBorder,
-              error: _buildErrorWidget(),
-            ),
+            )
           )
       )
     );

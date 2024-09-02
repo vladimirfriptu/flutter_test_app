@@ -15,6 +15,7 @@ class SubmitButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 48.0,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
@@ -32,7 +33,7 @@ class SubmitButtonWidget extends StatelessWidget {
       child: ElevatedButton(
         onPressed: disabled ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           minimumSize: const Size(240, 36),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
